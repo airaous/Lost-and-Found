@@ -5,7 +5,7 @@ import { getApiBaseUrl } from '../utils/api.js';
 
 const apiBaseUrl = getApiBaseUrl();
 
-export default function Feed({ status, refreshToken }) {
+export default function Feed({ status, refreshToken, searchTerm }) {
   const [posts, setPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -18,8 +18,15 @@ export default function Feed({ status, refreshToken }) {
       setError('');
 
       try {
-  const search = status ? `?status=${encodeURIComponent(status)}` : '';
-  const response = await fetch(`${apiBaseUrl}/api/posts${search}`);
+        const params = new URLSearchParams();
+        if (status) {
+          params.append('status', status);
+        }
+        if (searchTerm && searchTerm.trim()) {
+          params.append('q', searchTerm.trim());
+        }
+        const query = params.toString();
+        const response = await fetch(`${apiBaseUrl}/api/posts${query ? `?${query}` : ''}`);
         if (!response.ok) {
           throw new Error('Unable to load posts right now.');
         }
@@ -44,7 +51,7 @@ export default function Feed({ status, refreshToken }) {
     return () => {
       isMounted = false;
     };
-  }, [status, refreshToken]);
+  }, [status, refreshToken, searchTerm]);
 
   if (isLoading) {
     return <p className="text-sm text-slate-500">Loading {status ?? 'latest'} posts…</p>;
@@ -55,6 +62,13 @@ export default function Feed({ status, refreshToken }) {
   }
 
   if (!posts.length) {
+    if (searchTerm?.trim()) {
+      return (
+        <p className="text-sm text-slate-500">
+          No matches for “{searchTerm.trim()}”. Try a different keyword.
+        </p>
+      );
+    }
     return <p className="text-sm text-slate-500">No {status ?? ''} items yet. Be the first to add one!</p>;
   }
 
@@ -82,5 +96,6 @@ export default function Feed({ status, refreshToken }) {
 
 Feed.propTypes = {
   status: PropTypes.oneOf(['lost', 'found', undefined]),
-  refreshToken: PropTypes.number
+  refreshToken: PropTypes.number,
+  searchTerm: PropTypes.string
 };

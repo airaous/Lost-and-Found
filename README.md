@@ -28,6 +28,8 @@ Campus Lost & Found is a simple digital bulletin board for university communitie
 
 Frontend runs on <http://localhost:5173> and expects the API at <http://localhost:4000> during local development.
 
+The client supports keyword search, optional item photos (inline base64, 2 MB limit), and an “Mark as Claimed” action that archives a listing without deleting its record.
+
 ## Deployment notes
 
 - **Frontend (Vercel)**: Configure a new Vercel project pointing to `/client` with the build command `npm run build` and output directory `dist`. Provide `VITE_API_BASE_URL` in the Vercel dashboard so the UI can reach the hosted API.
@@ -38,8 +40,10 @@ Frontend runs on <http://localhost:5173> and expects the API at <http://localhos
 | Method | Endpoint | Description |
 | --- | --- | --- |
 | `POST` | `/api/posts` | Create a lost/found post |
-| `GET` | `/api/posts` | List posts (optional `status=lost|found`; active posts only by default) |
+| `GET` | `/api/posts` | List posts (optional `status=lost|found`, `q=keyword`; active posts only by default) |
 | `GET` | `/api/posts/:id` | Get a post by ID |
 | `PATCH` | `/api/posts/:id/unlist` | Mark a post as claimed/unlisted |
+
+Image uploads are sent as base64-encoded data URLs and capped at 2 MB to keep payloads manageable for MongoDB Atlas free tier.
 
 All responses are JSON. Validation errors return HTTP 400; missing records return HTTP 404.

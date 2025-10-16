@@ -6,6 +6,11 @@ export default function App() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [refreshToken, setRefreshToken] = useState(Date.now());
   const [activeTab, setActiveTab] = useState('lost');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
 
   const handlePostCreated = () => {
     setRefreshToken(Date.now());
@@ -33,26 +38,52 @@ export default function App() {
       <main className="relative z-10 -mt-14 pb-20">
         <div className="mx-auto max-w-5xl px-4">
           <section className="rounded-3xl bg-white p-6 shadow-xl ring-1 ring-slate-200">
-            <nav className="flex gap-2 rounded-full bg-slate-100 p-1">
-              {[
-                { label: 'Lost Items', value: 'lost' },
-                { label: 'Found Items', value: 'found' }
-              ].map((tab) => (
-                <button
-                  key={tab.value}
-                  type="button"
-                  className={`flex-1 rounded-full px-4 py-2 text-sm font-semibold transition ${
-                    activeTab === tab.value ? 'bg-white text-campus-blue shadow-sm' : 'text-slate-500 hover:text-slate-700'
-                  }`}
-                  onClick={() => setActiveTab(tab.value)}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </nav>
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <nav className="flex gap-2 rounded-full bg-slate-100 p-1">
+                {[
+                  { label: 'Lost Items', value: 'lost' },
+                  { label: 'Found Items', value: 'found' }
+                ].map((tab) => (
+                  <button
+                    key={tab.value}
+                    type="button"
+                    className={`flex-1 rounded-full px-4 py-2 text-sm font-semibold transition ${
+                      activeTab === tab.value ? 'bg-white text-campus-blue shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                    onClick={() => setActiveTab(tab.value)}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </nav>
+
+              <div className="relative w-full md:w-80">
+                <label className="sr-only" htmlFor="search">
+                  Search posts
+                </label>
+                <input
+                  id="search"
+                  type="search"
+                  placeholder="Search by keyword…"
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  className="w-full rounded-full border border-slate-200 px-4 py-2 text-sm shadow-inner focus:border-campus-teal focus:outline-none focus:ring-2 focus:ring-campus-teal/20"
+                />
+                {searchTerm && (
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-3 text-slate-400 transition hover:text-slate-600"
+                    onClick={() => setSearchTerm('')}
+                    aria-label="Clear search"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            </div>
 
             <div className="mt-6">
-              <Feed status={activeTab} refreshToken={refreshToken} />
+              <Feed status={activeTab} refreshToken={refreshToken} searchTerm={searchTerm} />
             </div>
           </section>
         </div>

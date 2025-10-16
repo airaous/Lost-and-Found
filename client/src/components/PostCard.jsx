@@ -49,6 +49,16 @@ export default function PostCard({ post, onUnlist }) {
           <span className="font-medium text-slate-700">Location:</span> {post.location}
         </p>
         {post.description && <p className="text-sm text-slate-600 whitespace-pre-line">{post.description}</p>}
+        {post.image && (
+          <div className="overflow-hidden rounded-xl border border-slate-100">
+            <img
+              className="h-64 w-full object-cover"
+              src={post.image}
+              alt={`${post.status === 'found' ? 'Found' : 'Lost'} item: ${post.itemName}`}
+              loading="lazy"
+            />
+          </div>
+        )}
       </div>
       <footer className="space-y-3 border-t border-slate-100 px-4 py-3 text-sm text-slate-500">
         <div className="space-y-1">
@@ -98,7 +108,8 @@ PostCard.propTypes = {
     location: PropTypes.string.isRequired,
     contactInfo: PropTypes.string,
     contactPhone: PropTypes.string,
-    createdAt: PropTypes.string
+      image: PropTypes.string,
+      createdAt: PropTypes.string
   }).isRequired,
   onUnlist: PropTypes.func
 };

@@ -17,16 +17,64 @@ export default function PostForm({ onSuccess, onClose }) {
   const [formData, setFormData] = useState(initialFormState);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [imageData, setImageData] = useState('');
+  const [imagePreview, setImagePreview] = useState('');
+  const [imageError, setImageError] = useState('');
 
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleImageChange = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      setImageData('');
+      setImagePreview('');
+      setImageError('');
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      setImageError('Please select a valid image file.');
+      return;
+    }
+
+    const maxBytes = 2 * 1024 * 1024; // 2MB cap
+    if (file.size > maxBytes) {
+      setImageError('Images must be 2MB or smaller.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = typeof reader.result === 'string' ? reader.result : '';
+      setImageData(result);
+      setImagePreview(result);
+      setImageError('');
+    };
+    reader.onerror = () => {
+      setImageError('Unable to read the selected file. Please try another image.');
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleImageRemove = () => {
+    setImageData('');
+    setImagePreview('');
+    setImageError('');
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setIsSubmitting(true);
     setError('');
+
+    if (imageError) {
+      setError(imageError);
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       const payload = {
@@ -37,6 +85,10 @@ export default function PostForm({ onSuccess, onClose }) {
 
       if (!payload.contactPhone) {
         delete payload.contactPhone;
+      }
+
+      if (imageData) {
+        payload.image = imageData;
       }
 
       const response = await fetch(`${apiBaseUrl}/api/posts`, {
@@ -51,6 +103,9 @@ export default function PostForm({ onSuccess, onClose }) {
 
       const createdPost = await response.json();
   setFormData(() => ({ ...initialFormState }));
+      setImageData('');
+      setImagePreview('');
+      setImageError('');
       onSuccess?.(createdPost);
       onClose?.();
     } catch (submissionError) {
@@ -152,6 +207,33 @@ export default function PostForm({ onSuccess, onClose }) {
           onChange={handleChange}
           placeholder="e.g., +91 98765 43210"
         />
+      </div>
+
+      <div className="grid gap-2">
+        <label className="text-sm font-medium text-slate-700" htmlFor="itemImage">
+          Item Photo (optional)
+        </label>
+        <input
+          className="text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-campus-teal file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white file:transition hover:file:bg-sky-600"
+          id="itemImage"
+          name="itemImage"
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
+        />
+        {imagePreview && (
+          <div className="relative mt-2 overflow-hidden rounded-xl border border-slate-200">
+            <img className="h-48 w-full object-cover" src={imagePreview} alt="Selected item preview" />
+            <button
+              type="button"
+              className="absolute right-3 top-3 rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-slate-600 shadow hover:bg-white"
+              onClick={handleImageRemove}
+            >
+              Remove
+            </button>
+          </div>
+        )}
+        {imageError && <p className="rounded-md bg-rose-100 px-3 py-2 text-xs text-rose-700">{imageError}</p>}
       </div>
 
       {error && <p className="rounded-md bg-rose-100 px-3 py-2 text-sm text-rose-700">{error}</p>}
