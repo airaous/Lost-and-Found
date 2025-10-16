@@ -31,14 +31,15 @@ Frontend runs on <http://localhost:5173> and expects the API at <http://localhos
 ## Deployment notes
 
 - **Frontend (Vercel)**: Configure a new Vercel project pointing to `/client` with the build command `npm run build` and output directory `dist`. Provide `VITE_API_BASE_URL` in the Vercel dashboard so the UI can reach the hosted API.
-- **Backend (Zeabur)**: Deploy the `server` folder. Set environment variables `MONGODB_URI` and `PORT` (Zeabur often provides `PORT`). Use the start command `npm run start`.
+- **Backend (Render)**: Deploy the `server` folder. Set environment variables `MONGODB_URI` and `PORT` (Render often provides `PORT`). Use the start command `npm run start`.
 
 ## API overview
 
 | Method | Endpoint | Description |
 | --- | --- | --- |
 | `POST` | `/api/posts` | Create a lost/found post |
-| `GET` | `/api/posts` | List posts (optional `status=lost|found`) |
+| `GET` | `/api/posts` | List posts (optional `status=lost|found`; active posts only by default) |
 | `GET` | `/api/posts/:id` | Get a post by ID |
+| `PATCH` | `/api/posts/:id/unlist` | Mark a post as claimed/unlisted |
 
 All responses are JSON. Validation errors return HTTP 400; missing records return HTTP 404.

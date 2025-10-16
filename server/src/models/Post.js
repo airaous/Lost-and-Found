@@ -26,6 +26,14 @@ const postSchema = new mongoose.Schema(
       required: true,
       trim: true
     },
+    contactPhone: {
+      type: String,
+      trim: true
+    },
+    isActive: {
+      type: Boolean,
+      default: true
+    },
     createdAt: {
       type: Date,
       default: Date.now

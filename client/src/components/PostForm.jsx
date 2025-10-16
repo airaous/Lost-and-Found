@@ -7,7 +7,8 @@ const initialFormState = {
   itemName: '',
   location: '',
   description: '',
-  contactInfo: ''
+  contactInfo: '',
+  contactPhone: ''
 };
 
 const apiBaseUrl = getApiBaseUrl();
@@ -28,10 +29,20 @@ export default function PostForm({ onSuccess, onClose }) {
     setError('');
 
     try {
-  const response = await fetch(`${apiBaseUrl}/api/posts`, {
+      const payload = {
+        ...formData,
+        contactInfo: formData.contactInfo.trim(),
+        contactPhone: formData.contactPhone.trim()
+      };
+
+      if (!payload.contactPhone) {
+        delete payload.contactPhone;
+      }
+
+      const response = await fetch(`${apiBaseUrl}/api/posts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(payload)
       });
 
       if (!response.ok) {
@@ -39,7 +50,7 @@ export default function PostForm({ onSuccess, onClose }) {
       }
 
       const createdPost = await response.json();
-      setFormData(initialFormState);
+  setFormData(() => ({ ...initialFormState }));
       onSuccess?.(createdPost);
       onClose?.();
     } catch (submissionError) {
@@ -114,16 +125,32 @@ export default function PostForm({ onSuccess, onClose }) {
 
       <div className="grid gap-2">
         <label className="text-sm font-medium text-slate-700" htmlFor="contactInfo">
-          Contact Information
+          Contact Email
         </label>
         <input
           className="rounded-lg border border-slate-300 px-4 py-2 text-sm focus:border-campus-teal focus:outline-none focus:ring-2 focus:ring-campus-teal/20"
           id="contactInfo"
           name="contactInfo"
+          type="email"
           value={formData.contactInfo}
           onChange={handleChange}
           placeholder="e.g., student.email@dypiu.ac.in"
           required
+        />
+      </div>
+
+      <div className="grid gap-2">
+        <label className="text-sm font-medium text-slate-700" htmlFor="contactPhone">
+          Phone Number (optional)
+        </label>
+        <input
+          className="rounded-lg border border-slate-300 px-4 py-2 text-sm focus:border-campus-teal focus:outline-none focus:ring-2 focus:ring-campus-teal/20"
+          id="contactPhone"
+          name="contactPhone"
+          type="tel"
+          value={formData.contactPhone}
+          onChange={handleChange}
+          placeholder="e.g., +91 98765 43210"
         />
       </div>
 

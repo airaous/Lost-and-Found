@@ -18,8 +18,8 @@ export default function Feed({ status, refreshToken }) {
       setError('');
 
       try {
-        const search = status ? `?status=${encodeURIComponent(status)}` : '';
-        const response = await fetch(`${apiBaseUrl}/api/posts${search}`);
+  const search = status ? `?status=${encodeURIComponent(status)}` : '';
+  const response = await fetch(`${apiBaseUrl}/api/posts${search}`);
         if (!response.ok) {
           throw new Error('Unable to load posts right now.');
         }
@@ -58,10 +58,23 @@ export default function Feed({ status, refreshToken }) {
     return <p className="text-sm text-slate-500">No {status ?? ''} items yet. Be the first to add one!</p>;
   }
 
+  const handleUnlist = async (postId) => {
+    const response = await fetch(`${apiBaseUrl}/api/posts/${postId}/unlist`, {
+      method: 'PATCH'
+    });
+
+    if (!response.ok) {
+      const message = response.status === 404 ? 'This post was already removed.' : 'Unable to mark this post as claimed.';
+      throw new Error(message);
+    }
+
+    setPosts((previous) => previous.filter((post) => post._id !== postId));
+  };
+
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
       {posts.map((post) => (
-        <PostCard key={post._id ?? post.itemName} post={post} />
+        <PostCard key={post._id ?? post.itemName} post={post} onUnlist={handleUnlist} />
       ))}
     </div>
   );
